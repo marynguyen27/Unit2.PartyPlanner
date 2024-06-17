@@ -1,15 +1,14 @@
 const API_URL =
-  'https://fsa-crud-2aa9294fe819.herokuapp.com/api/2404-FTB-MT-WEB-PT/events/';
+  'https://fsa-crud-2aa9294fe819.herokuapp.com/api/2404-FTB-MT-WEB-PT/events';
 
 const state = {
   events: [],
   event: '',
 };
 
-// table of the parties - names, dates, times, locations, descriptions
-const eventsTable = document.querySelector('#events');
-const addEventForm = document.querySelector('addEvent');
-const button = document.querySelector('button');
+// table of the parties - names, dates, locations, descriptions
+const eventsList = document.querySelector('#events');
+const addEventForm = document.querySelector('#partyForm');
 addEventForm.addEventListener('submit', (e) => addOrEditEvent(e));
 
 // fetch GET array of all the parties from the API
@@ -17,16 +16,13 @@ const retrieveAllEvents = async () => {
   try {
     const response = await fetch(API_URL);
     const result = await response.json();
-    state.events = result.data;
+    state.events = result;
     console.log(result);
+    render();
   } catch (err) {
     console.log(err);
   }
 };
-
-// delete button next to each party
-
-// event listener on form, trigger submit event
 
 // DELETE remove party from the list
 const deleteEvent = async (deletedID) => {
@@ -36,59 +32,62 @@ const deleteEvent = async (deletedID) => {
       method: 'DELETE',
     });
     const index = state.events.findIndex((event) => event.id === deletedId);
-    state.events.splice(index, 1);
+    if (index > -1) {
+      state.events.splice(index, 1);
+    }
     render();
   } catch (err) {
     console.log(err);
   }
 };
 
-// form to submit new party
-
-// POST (name, date, time, location, description)
-const createParty = async (newParty) => {
-  console.log(newParty);
+// POST (name, date, location, description)
+const createEvent = async (newEvent) => {
+  console.log(newEvent);
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(newParty),
+      body: JSON.stringify(newEvent),
     });
     const result = await response.json();
     console.log('This is the result: ', result);
-    state.parties.push(result.data);
+    state.events.push(result.data);
     render();
   } catch (err) {
     console.log(err);
   }
 };
 
-// event listener on form to add party to the list of parties
-
+// render events to DOM
 const render = async () => {
   const eventElements = [];
-  console.log(state.events, 'here in render');
+  if (!state.events.length) {
+    const messageElement = document.createElement('p');
+    messageElement.textContent = 'No parties found.';
+    eventsList.append(messageElement);
+    return;
+  }
   for (let i = 0; i < state.events.length; i++) {
     const eventContainer = document.createElement('li');
     const eventName = document.createElement(h3);
+    const eventDate = document.createElement('p');
+    const eventLocation = document.createElement('p');
     const eventDescription = document.createElement('p');
-    const recipeImg = document.createElement('img');
+
     eventName.textContent = state.events[i].name;
-    eventDate.textContent = state.date[i].date;
-    eventTime.textContent = state.time[i].time;
-    eventLocation.textContent = state.location[i].location;
+    eventDate.textContent = state.events[i].date;
+    eventLocation.textContent = state.events[i].location;
     eventDescription.textContent = state.events[i].description;
+
     const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
     deleteButton.addEventListener('click', () => {
       deleteEvent(state.events[i].id);
     });
-    const viewButton = document.createElement('button');
-    viewButton.textContent = 'View';
-    viewButton.addEventListener('click', () => {
-      deleteRecipe(state.events[i].id);
-    });
+
     eventContainer.append(
       eventName,
       eventDate,
@@ -96,19 +95,38 @@ const render = async () => {
       eventDescription,
       deleteButton
     );
+    eventElements.push(eventContainer);
   }
-  eventsList.replaceChildren(...replaceElements);
+  eventsList.replaceChildren(...eventElements);
+  eventsList.append(...eventElements);
 };
 
-async function addOrEditEvent (e){
-  console.log(e.target)
-  e.preventDefault()
+// form submission
+async function addOrEditEvent(e) {
+  console.log(e.target);
+  e.preventDefault();
+  const newEventObj = {
+    name: addEventForm.name.value,
+    date: addEventForm.date.value,
+    location: addEventForm.location.value,
+    description: addEventForm.description.value,
+  };
+  createEvent(newEventObj);
+  addEventForm.reset();
+}
+
+async function init() {
+  await retrieveAllEvents();
+  console.log(state);
+  render();
+}
+
+init();
+
+/*
   if(e.target.getAttribute("id")==="addEvent"){
     const newEventObj = {
-      name: addEventForm.name.value,
-      date: addEventForm.date.value 
-      location: addEventForm.location.value
-      description: addEventForm.description.value
+
     }
     createEvent(newEventObj)
   }else{
@@ -118,6 +136,51 @@ async function addOrEditEvent (e){
 
 const addForm = ()=>{
   const form = document.createElement("form")
+  
   const nameLabel = document.createElement("label")
   const nameInput = document.createElement("input")
+
+  const dateLabel = document.createElement("label")
+  const dateInput = document.createElement("input")
+
+  const locationLabel = document.createElement("label")
+  const locationInput= document.createElement("input")
+
+  const descriptionLabel = document.createElement("label")
+  const descriptionInput= document.createElement("input")
+
+  nameLabel.textContent = "Name"
+  dateLabel.textContent = "Date"
+  locationLabel.textContent = "Location"
+  descriptionLabel.textContent = "Description"
+
+  const addButton = document.createElement("button")
+    addButton.textContent = "Submit"
+    addButton.addEventListener("click",(event)=>{
+      event.preventDefault()
+      const newEvent = {
+        name:nameInput.value,
+        date:dateInput.value,
+        location:locationInput.value,
+        description:descriptionInput.value,
+      }
+      createEvent(newEvent)
+      nameInput.value=""
+      dateInput.value=""
+      locationInput.value=""
+      descriptionInput.value=""
+    })
+  form.append(nameLabel, nameInput, dateLabel, dateInput, locationLabel, locationInput, descriptionLabel, descriptionInput, addButton)
+  addEventForm.append(form)
 }
+
+    const viewButton = document.createElement('button');
+    viewButton.textContent = 'View';
+    viewButton.addEventListener('click', () => {
+      deleteRecipe(state.events[i].id);
+    });
+
+  }
+  eventsList.replaceChildren(...replaceElements);
+};
+*/
