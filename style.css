@@ -1,0 +1,76 @@
+h1 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: blue;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto 40px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+form label {
+  font-weight: bold;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-style: italic;
+}
+
+form button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: larger;
+  font-style: italic;
+}
+
+form button:hover {
+  background-color: #000000;
+}
+
+#events {
+  list-style-type: none;
+  padding: 0;
+}
+
+#events li {
+  background-color: #cadff5;
+  margin-bottom: 10px;
+  padding: 15px;
+  border: 5px solid #192634;
+}
+
+#events li h3 {
+  margin-top: 0;
+  color: #000000;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+#events li p {
+  margin: 5px 0;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+#events li button {
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-style: italic;
+}
+
+#events li button:hover {
+  background-color: #000000;
+}
