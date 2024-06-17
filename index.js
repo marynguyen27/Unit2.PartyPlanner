@@ -16,7 +16,8 @@ const retrieveAllEvents = async () => {
   try {
     const response = await fetch(API_URL);
     const result = await response.json();
-    state.events = result;
+    console.log('API response (parsed):', result);
+    state.events = result.data;
     console.log(result);
     render();
   } catch (err) {
@@ -25,7 +26,7 @@ const retrieveAllEvents = async () => {
 };
 
 // DELETE remove party from the list
-const deleteEvent = async (deletedID) => {
+const deleteEvent = async (deletedId) => {
   console.log(deletedId);
   try {
     response = await fetch(`${API_URL}/${deletedId}`, {
@@ -43,7 +44,12 @@ const deleteEvent = async (deletedID) => {
 
 // POST (name, date, location, description)
 const createEvent = async (newEvent) => {
-  console.log(newEvent);
+  console.log(state.events);
+  if (state.events.length === 0) {
+    console.log('No events fetched yet. Try fetching data first');
+    return;
+  }
+
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -52,8 +58,10 @@ const createEvent = async (newEvent) => {
       },
       body: JSON.stringify(newEvent),
     });
+
     const result = await response.json();
     console.log('This is the result: ', result);
+
     state.events.push(result.data);
     render();
   } catch (err) {
@@ -64,123 +72,81 @@ const createEvent = async (newEvent) => {
 // render events to DOM
 const render = async () => {
   const eventElements = [];
+
   if (!state.events.length) {
     const messageElement = document.createElement('p');
     messageElement.textContent = 'No parties found.';
-    eventsList.append(messageElement);
+    eventsList.replaceChildren(messageElement);
     return;
   }
-  for (let i = 0; i < state.events.length; i++) {
-    const eventContainer = document.createElement('li');
-    const eventName = document.createElement(h3);
-    const eventDate = document.createElement('p');
-    const eventLocation = document.createElement('p');
-    const eventDescription = document.createElement('p');
 
-    eventName.textContent = state.events[i].name;
-    eventDate.textContent = state.events[i].date;
-    eventLocation.textContent = state.events[i].location;
-    eventDescription.textContent = state.events[i].description;
+  for (let i = 0; i < state.events.length; i++) {
+    const event = state.events[i];
+
+    const eventContainer = document.createElement('li');
+
+    const eventName = document.createElement('h3');
+    eventName.textContent = event.name;
+
+    const eventDescription = document.createElement('p');
+    eventDescription.textContent = event.description;
+
+    const eventDate = document.createElement('p');
+    eventDate.textContent = event.date;
+
+    const eventLocation = document.createElement('p');
+    eventLocation.textContent = event.location;
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Delete';
     deleteButton.addEventListener('click', () => {
-      deleteEvent(state.events[i].id);
+      deleteEvent(event.id);
     });
 
     eventContainer.append(
       eventName,
+      eventDescription,
       eventDate,
       eventLocation,
-      eventDescription,
       deleteButton
     );
     eventElements.push(eventContainer);
   }
-  eventsList.replaceChildren(...eventElements);
-  eventsList.append(...eventElements);
+  if (eventElements.length) {
+    eventsList.append(...eventElements);
+  } else {
+    console.error('No event elements created in render function.'); // Potential issue
+  }
 };
 
 // form submission
 async function addOrEditEvent(e) {
   console.log(e.target);
   e.preventDefault();
+
+  const name = addEventForm.name.value;
+  const description = addEventForm.description.value;
+  const date = new Date(addEventForm.date.value).toISOString(); // Formatting the date
+  const time = addEventForm.time.value;
+  const location = addEventForm.location.value;
+
   const newEventObj = {
-    name: addEventForm.name.value,
-    date: addEventForm.date.value,
-    location: addEventForm.location.value,
-    description: addEventForm.description.value,
+    name: name,
+    description: description,
+    date: date,
+    location: location,
   };
-  createEvent(newEventObj);
+
+  console.log('Adding new event:', newEventObj);
+
+  await createEvent(newEventObj);
   addEventForm.reset();
 }
 
 async function init() {
   await retrieveAllEvents();
-  console.log(state);
+  console.log('State after fetching events:', state);
   render();
 }
 
 init();
-
-/*
-  if(e.target.getAttribute("id")==="addEvent"){
-    const newEventObj = {
-
-    }
-    createEvent(newEventObj)
-  }else{
-
-  }
-}
-
-const addForm = ()=>{
-  const form = document.createElement("form")
-  
-  const nameLabel = document.createElement("label")
-  const nameInput = document.createElement("input")
-
-  const dateLabel = document.createElement("label")
-  const dateInput = document.createElement("input")
-
-  const locationLabel = document.createElement("label")
-  const locationInput= document.createElement("input")
-
-  const descriptionLabel = document.createElement("label")
-  const descriptionInput= document.createElement("input")
-
-  nameLabel.textContent = "Name"
-  dateLabel.textContent = "Date"
-  locationLabel.textContent = "Location"
-  descriptionLabel.textContent = "Description"
-
-  const addButton = document.createElement("button")
-    addButton.textContent = "Submit"
-    addButton.addEventListener("click",(event)=>{
-      event.preventDefault()
-      const newEvent = {
-        name:nameInput.value,
-        date:dateInput.value,
-        location:locationInput.value,
-        description:descriptionInput.value,
-      }
-      createEvent(newEvent)
-      nameInput.value=""
-      dateInput.value=""
-      locationInput.value=""
-      descriptionInput.value=""
-    })
-  form.append(nameLabel, nameInput, dateLabel, dateInput, locationLabel, locationInput, descriptionLabel, descriptionInput, addButton)
-  addEventForm.append(form)
-}
-
-    const viewButton = document.createElement('button');
-    viewButton.textContent = 'View';
-    viewButton.addEventListener('click', () => {
-      deleteRecipe(state.events[i].id);
-    });
-
-  }
-  eventsList.replaceChildren(...replaceElements);
-};
-*/
