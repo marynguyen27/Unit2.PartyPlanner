@@ -6,7 +6,7 @@ const state = {
   event: '',
 };
 
-// table of the parties - names, dates, locations, descriptions
+// list of the parties - names, dates, locations, descriptions
 const eventsList = document.querySelector('#events');
 const addEventForm = document.querySelector('#partyForm');
 addEventForm.addEventListener('submit', (e) => addOrEditEvent(e));
@@ -146,7 +146,6 @@ async function addOrEditEvent(e) {
 async function init() {
   await retrieveAllEvents();
   console.log('State after fetching events:', state);
-  render();
 }
 
 init();
