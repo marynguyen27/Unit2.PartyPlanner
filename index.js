@@ -71,6 +71,8 @@ const createEvent = async (newEvent) => {
 
 // render events to DOM
 const render = async () => {
+  // eventsList.textContent = '';  // don't need this becus ending has replaceChildren
+
   const eventElements = [];
 
   if (!state.events.length) {
@@ -113,7 +115,7 @@ const render = async () => {
     eventElements.push(eventContainer);
   }
   if (eventElements.length) {
-    eventsList.append(...eventElements);
+    eventsList.replaceChildren(...eventElements);
   } else {
     console.error('No event elements created in render function.'); // Potential issue
   }
@@ -126,6 +128,7 @@ async function addOrEditEvent(e) {
 
   const name = addEventForm.name.value;
   const description = addEventForm.description.value;
+
   const date = new Date(addEventForm.date.value).toISOString(); // Formatting the date
   const time = addEventForm.time.value;
   const location = addEventForm.location.value;
